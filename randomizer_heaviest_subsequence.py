@@ -2,17 +2,13 @@
 import statistics
 import math
 import matplotlib.pyplot as plt
+import numpy
 
 
 import heaviest_subsequence_alg
 import rand_weights_and_points
+import constants
 import calculator
-
-
-# TODO: Yuval Geva use this :)
-# TODO: Haim use this :)
-UNIFORM = "UNIFORM"
-ALPHA = "ALPHA_"
 
 
 # TODO: Haim should call this function
@@ -36,7 +32,7 @@ def randomize(num_points, expected_weights, alpha=None):
         weights_lst = rand_weights_and_points.rand_weights_uniformly(num_points)
 
     heaviest_subseq = heaviest_subsequence_alg.algorithm(y_lst, weights_lst)
-    exp_weight = expected_weights[ALPHA + str(alpha)] if alpha else expected_weights[UNIFORM]
+    exp_weight = expected_weights[constants.ALPHA + str(alpha)] if alpha else expected_weights[constants.UNIFORM]
     ratio = abs(heaviest_subseq - exp_weight)
 
     return x_y_lst, heaviest_subseq, ratio
@@ -71,8 +67,31 @@ def run_many_points():
     pass
 
 
+def frange(start, end=None, inc=None):
+    "A range function, that does accept float increments..."
+
+    if end == None:
+        end = start + 0.0
+        start = 0.0
+
+    if inc == None:
+        inc = 1.0
+
+    L = []
+    while 1:
+        next = start + len(L) * inc
+        if inc > 0 and next >= end:
+            break
+        elif inc < 0 and next <= end:
+            break
+        L.append(next)
+
+    return L
+
+
 if __name__ == "__main__":
 
+    
     # for each point: x=place in line, y=row in the plane
 
     # TODO: Haim

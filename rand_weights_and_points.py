@@ -2,6 +2,7 @@
 import numpy.random as rnd
 import calculator
 
+
 def rand_weights_by_alpha(num_points, alpha):
     """
     Randomize n weights from the alpha distribution.
@@ -12,10 +13,10 @@ def rand_weights_by_alpha(num_points, alpha):
     :param alpha: A float between (-2) to 3
     :return: weights list (each item is an int - 1/2/4/8/16)
     """
-    proDict=calculator.calc_alpha_probabilities(alpha)
-    weightsArr=proDict.keys()
-    probArry=proDict.values()
-    lst=rnd.choice(weightsArr,num_points,True,probArry)
+    proDict = calculator.calc_alpha_probabilities(alpha)
+    weightsArr = proDict.keys()
+    probArry = proDict.values()
+    lst = rnd.choice(weightsArr, num_points, True, probArry)
     return list(lst)
     # Yuval Geva (use this func: calc_alpha_probabilities)
 
@@ -28,7 +29,7 @@ def rand_weights_uniformly(num_points):
     :return: weights list (each item is an int - 1/2/4/8/16)
     """
     weightsArr=[1,2,4,8,16]
-    lst=rnd.choice(weightsArr,num_points,True)
+    lst = rnd.choice(weightsArr, num_points, True)
     return list(lst)
     #  Yuval Geva
 

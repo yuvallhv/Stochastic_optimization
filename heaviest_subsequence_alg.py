@@ -1,5 +1,6 @@
 import bisect
 
+
 def heaviest_subseq(in_list):
     """How does this work?
     best_subseq: list of tuples - (biggest number in seq so far, sum of seq).
@@ -40,6 +41,7 @@ def heaviest_subseq(in_list):
             num_deleted += 1
         best_subseq.insert(insert_loc, (new_elem, new_subseq_val))
     return max(val for key, val in best_subseq)
+
 
 def algorithm(y_lst, weight_lst):
     """
