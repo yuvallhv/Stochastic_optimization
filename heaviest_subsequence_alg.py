@@ -1,4 +1,5 @@
 import bisect
+import constants
 
 
 def heaviest_subseq(in_list):
@@ -57,6 +58,7 @@ def algorithm(y_lst, weight_lst):
     In this case, y_lst isn't needed at all.
     """
 
+    constants.print_debug("running the heaviest sub-sequence algorithm")
     if len(weight_lst) != len(y_lst):
         return "list lenghts do not match"
     pairs = [(y_lst[i], weight_lst[i]) for i in range(0, len(weight_lst))]
