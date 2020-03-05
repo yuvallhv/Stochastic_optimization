@@ -67,31 +67,27 @@ def run_many_points():
     pass
 
 
-def frange(start, end=None, inc=None):
-    "A range function, that does accept float increments..."
-
-    if end == None:
-        end = start + 0.0
-        start = 0.0
-
-    if inc == None:
-        inc = 1.0
-
-    L = []
-    while 1:
-        next = start + len(L) * inc
-        if inc > 0 and next >= end:
-            break
-        elif inc < 0 and next <= end:
-            break
-        L.append(next)
-
-    return L
-
-
 if __name__ == "__main__":
 
-    
+    expected_alpha_weight_list = {}
+
+    # calculate the expected weight of the heaviest sub-sequence for uniform distribution
+    expected_alpha_weight_list[constants.UNIFORM] = calculator.calculate_expected_weight(None)
+
+    for alpha in constants.ALPHA_RANGE:
+
+        # calculate the probabilities to get each weight (1,2,4,8,16) by the chosen alpha
+        alpha_prob_list = calculator.calc_alpha_probabilities(alpha)
+
+        # calculate the expected weight of the heaviest sub-sequence for the chosen alpha
+        expected_alpha_weight_list[constants.ALPHA + str(alpha)] = calculator.calculate_expected_weight(alpha, alpha_prob_list)
+
+        # res_tuple = randomize(10000, alpha_weight_list, alpha)
+        # constants.print_debug("res_tuple: {}".format(res_tuple))
+        # constants.print_debug("x: {}".format(alpha))
+
+
+
     # for each point: x=place in line, y=row in the plane
 
     # TODO: Haim

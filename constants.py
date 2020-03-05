@@ -5,7 +5,7 @@ import numpy
 # TODO: Haim use this :)
 UNIFORM = "UNIFORM"
 ALPHA = "ALPHA_"
-ALPHA_RANGE = numpy.arange(-2.0, 3.0, 0.1)
+ALPHA_RANGE = numpy.arange(-2.0, 3.1, 0.1)
 WEIGHT_1 = 1
 WEIGHT_2 = 2
 WEIGHT_4 = 4
@@ -19,3 +19,7 @@ def print_debug(str):
     if DEBUG_MODE:
         print(str)
 
+
+def print_dict(dictionary):
+    for key, val in zip(dictionary.keys(), dictionary.values()):
+        print("{}: {}".format(key, val))
