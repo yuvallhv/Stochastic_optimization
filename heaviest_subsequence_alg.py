@@ -64,4 +64,4 @@ def algorithm(y_lst, weight_lst):
     pairs = [(y_lst[i], weight_lst[i]) for i in range(0, len(weight_lst))]
     pairs = sorted(pairs, key=lambda tup: tup[0])
     weights = [x[1] for x in pairs]
-    return heaviest_subseq(weights)
+    return heaviest_subseq(y_lst)

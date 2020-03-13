@@ -3,13 +3,8 @@ import statistics
 import math
 import matplotlib.pyplot as plt
 import numpy
-
-
-import heaviest_subsequence_alg
-import rand_weights_and_points
-import constants
-import calculator
-
+import constants, calculator, rand_weights_and_points, heaviest_subsequence_alg
+import pandas as pd
 
 # TODO: Haim should call this function
 def randomize(num_points, expected_weights_dict, alpha=None):
@@ -42,7 +37,7 @@ def randomize(num_points, expected_weights_dict, alpha=None):
 
     ratio = abs(heaviest_subseq - exp_weight)
 
-    return x_y_lst, heaviest_subseq, ratio
+    return x_y_lst, weights_lst, heaviest_subseq, ratio
 
 
 def handle_results(alpha, heaviest_subsequence, x_y_lst, graph_name, csv_name):
@@ -64,23 +59,39 @@ def handle_results(alpha, heaviest_subsequence, x_y_lst, graph_name, csv_name):
     # TODO: Yaniv
     pass
 
+def make_graph(name, results):
+    ids = [i[0] for i in results]
+    seqs = [i[1] for i in results]
+    mean = statistics.mean(seqs)
+    variance = statistics.variance(seqs)
+    plt.plot(ids, seqs, '-bo')
+    plt.ylim([min(seqs) - 3.0, max(seqs) + 4.0])
+    plt.xlabel("Test no.", fontweight="bold")
+    plt.ylabel("Heaviest subsequence", fontweight="bold")
+    plt.title(name + " - Heaviest Subsequences Test", fontweight="bold")
+    plt.figtext(.15, .8, "mean = {}".format(mean))
+    plt.figtext(.15, .75, "variance = {}".format(variance))
+    plt.show()
 
 def run_uniform_distribution(expected_weight_dict, num_points, repeats):
     constants.print_debug("\n*** running uniform distribution, {} times with {} points each time ***"
                           .format(repeats, num_points))
     graph_name = "uniform_distribution_graph_no._"
     csv_name = "uniform_distribution_csv_no._"
-
+    results = []
     for idx in range(repeats):
         constants.print_debug("\nrun no. {}".format((idx+1)))
-        x_y_lst, heaviest_subseq, ratio = randomize(num_points, expected_weight_dict)
+        x_y_lst, weight_lst, heaviest_subseq, ratio = randomize(num_points, expected_weight_dict)
+
+        x_lst, y_lst = [i[0] for i in x_y_lst], [i[1] for i in x_y_lst]
+        df = pd.DataFrame(data={"x_list": x_lst, "y_list": y_lst, "weights": weight_lst})
+        df.to_csv("csv\\" + graph_name + str(idx) + '.csv')
+
         handle_results(None, heaviest_subseq, x_y_lst, graph_name + str(idx), csv_name + str(idx))
+        results.append([idx, heaviest_subseq])
         constants.print_debug("heaviest sub-sequence is: {}, ratio between the expected and actual weight: {}\n"
                               .format(heaviest_subseq, ratio))
-
-
-    # TODO: Haim - make sure I did this correct, didnt have time to check
-    pass
+    make_graph("Unifrom Distribution", results)
 
 
 def run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats):
@@ -107,23 +118,23 @@ if __name__ == "__main__":
     # TODO: try to reach 1000 runs
     expected_weight_dict = {}
     num_points = 1000
-    repeats = 3
+    repeats = 100
 
     # calculate the expected weight of the heaviest sub-sequence and ration for uniform distribution
     expected_weight_dict[constants.UNIFORM] = calculator.calculate_expected_weight(None)
     run_uniform_distribution(expected_weight_dict, num_points, repeats)
-
-    # calculate the expected weight of the heaviest sub-sequence and ration for alpha distribution
-    for alpha in constants.ALPHA_RANGE:
-
-        # calculate the probabilities to get each weight (1,2,4,8,16) by the chosen alpha
-        alpha_prob_list = calculator.calc_alpha_probabilities(alpha)
-
-        # calculate the expected weight of the heaviest sub-sequence for the chosen alpha
-        expected_weight_dict[constants.ALPHA + str(alpha)] = calculator.calculate_expected_weight(alpha, alpha_prob_list)
-
-        # run
-        run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats)
+    #
+    # # calculate the expected weight of the heaviest sub-sequence and ration for alpha distribution
+    # for alpha in constants.ALPHA_RANGE:
+    #
+    #     # calculate the probabilities to get each weight (1,2,4,8,16) by the chosen alpha
+    #     alpha_prob_list = calculator.calc_alpha_probabilities(alpha)
+    #
+    #     # calculate the expected weight of the heaviest sub-sequence for the chosen alpha
+    #     expected_weight_dict[constants.ALPHA + str(alpha)] = calculator.calculate_expected_weight(alpha, alpha_prob_list)
+    #
+    #     # run
+    #     run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats)
 
 
     # for each point: x=place in line, y=row in the plane
