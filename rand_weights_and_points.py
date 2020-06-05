@@ -9,10 +9,11 @@ def rand_weights_by_alpha(num_points, alpha):
     Randomize n weights from the alpha distribution.
     Each of the following weight has an alpha-dependent probability:
     weight x - probability (x^(-alpha))/(sum of all probabilities)
+    and calculate the expected weight
 
     :param num_points: number of weights to randomize (n)
     :param alpha: A float between (-2) to 3
-    :return: weights list (each item is an int - 1/2/4/8/16)
+    :return: weights list (each item is an int - 1/2/4/8/16), expected weight (with sec moment)
     """
 
     constants.print_debug("randomizing {} weights from the alpha distribution, alpha= {}".format(num_points, alpha))
@@ -21,7 +22,9 @@ def rand_weights_by_alpha(num_points, alpha):
     prob_dict = calculator.calc_alpha_probabilities(alpha)
     prob_lst = list(prob_dict.values())
     lst = rnd.choice(constants.WEIGHTS_LST, num_points, True, prob_lst)
-    return list(lst)
+
+    expected_weight = calculator.calculate_expected_weight(alpha, prob_dict)
+    return list(lst), expected_weight
 
 
 def rand_weights_uniformly(num_points):

@@ -1,4 +1,4 @@
-
+import json
 import statistics
 import math
 import matplotlib.pyplot as plt
@@ -6,7 +6,7 @@ import numpy
 import constants, calculator, rand_weights_and_points, heaviest_subsequence_alg
 import pandas as pd
 
-# TODO: Haim should call this function
+
 def randomize(num_points, expected_weights_dict, alpha=None):
     """
     1. Randomize n points and weights from the specified distribution (x, y are randomized uniformly)
@@ -22,44 +22,62 @@ def randomize(num_points, expected_weights_dict, alpha=None):
     x_y_lst, y_lst = rand_weights_and_points.rand_points_uniform_distribution(num_points)
 
     if alpha:
-        weights_lst = rand_weights_and_points.rand_weights_by_alpha(num_points, alpha)
-        # constants.print_debug(weights_lst)
+        weights_lst, expected_weight = rand_weights_and_points.rand_weights_by_alpha(num_points, alpha)
+        # TODO: check the expected weights are ok - Yaniv
+        expected_weights_dict[constants.ALPHA_.format(str(alpha))] = expected_weight
     else:
         weights_lst = rand_weights_and_points.rand_weights_uniformly(num_points)
         constants.print_debug(weights_lst)
 
-    heaviest_subseq = heaviest_subsequence_alg.algorithm(y_lst, weights_lst)
+    heaviest_subseq_weight = heaviest_subsequence_alg.algorithm(y_lst, weights_lst)
 
     if alpha:
-        exp_weight = expected_weights_dict[constants.ALPHA + str(alpha)]
+        exp_weight = expected_weights_dict[constants.ALPHA_.format(str(alpha))]
     else:
         exp_weight = expected_weights_dict[constants.UNIFORM]
 
-    ratio = abs(heaviest_subseq - exp_weight)
+    ratio = abs(heaviest_subseq_weight - exp_weight)
 
-    return x_y_lst, weights_lst, heaviest_subseq, ratio
+    return x_y_lst, weights_lst, heaviest_subseq_weight, ratio
 
 
-def handle_results(alpha, heaviest_subsequence, x_y_lst, graph_name, csv_name):
+def handle_results(alpha, heaviest_subseq_weight, expected_weight, ratio, x_y_lst, file_name):
     """
-    Display the results in a graph, save the graph and export to excel
+    Save the results to json file
 
-    :param alpha: A float between (-2) to 3 for an alpha distribution or None for uniform distribution
-    :param heaviest_subsequence: The weight of the heaviest subsequence (int)
+    :param alpha: A float between (-2) to 3 for an alpha distribution or None for uniform distribution (float)
+    :param heaviest_subseq_weight: The weight of the heaviest subsequence (int)
+    :param expected_weight: The expected weight of the heaviest subsequence (int)
+    :param ratio: The ratio between the expected an the acual weight of the heaviest sub-sequence
     :param x_y_lst: The points tuples list [(X1,Y1),...,(Xn,Yn)]
-    :param graph_name: The name of the graph (to save)
-    :param csv_name: The name of the excel file (to save)
+    :param file_name: The name of the file (to save)
     """
 
-    constants.print_debug("creating graph and saving the results in: graph name={}, csv name={}"
-                          .format(graph_name, csv_name))
+    if alpha:
+        directory_name = constants.ALPHA_.format(str(alpha))
+    else:
+        directory_name = constants.UNIFORM
+
+    constants.print_debug("saving the results in: json name={}, at directory={}".format(file_name, directory_name))
+
+    # the x_y list is a list of tuples and should be turned to a list of lists in order to be saved in a json
+    x_y_list_of_lists = [list(x_y) for x_y in x_y_lst]
+
+    json_dict = {
+        constants.ALPHA_VAL: alpha,
+        constants.HEAVIEST_SUBSEQ_WEIGHT: heaviest_subseq_weight,
+        constants.EXPECTED_WEIGHT: expected_weight,
+        constants.RATIO: ratio,
+        constants.X_Y_LST: x_y_list_of_lists
+    }
+
+    # dump dictionary to json file
+    file_name = f"{directory_name}/{file_name}.json"
+    with open(file_name, 'w', encoding='utf-8') as f:
+        json.dump(json_dict, f, ensure_ascii=False, indent=4)
 
 
-    constants.print_debug("TODO")
-    # TODO: Yaniv
-    pass
-
-def make_graph(name, results):
+def make_graph(name, results, alpha=None):
     ids = [i[0] for i in results]
     seqs = [i[1] for i in results]
     mean = statistics.mean(seqs)
@@ -73,49 +91,63 @@ def make_graph(name, results):
     plt.figtext(.15, .75, "variance = {}".format(variance))
     plt.show()
 
+    # TODO: Yaniv
+
+
 def run_uniform_distribution(expected_weight_dict, num_points, repeats):
     constants.print_debug("\n*** running uniform distribution, {} times with {} points each time ***"
                           .format(repeats, num_points))
-    graph_name = "uniform_distribution_graph_no._"
-    csv_name = "uniform_distribution_csv_no._"
+    graph_name = "uniform_distribution_graph"
+    file_name = "uniform_distribution_no._{}"
     results = []
+
     for idx in range(repeats):
         constants.print_debug("\nrun no. {}".format((idx+1)))
-        x_y_lst, weight_lst, heaviest_subseq, ratio = randomize(num_points, expected_weight_dict)
+        x_y_lst, weight_lst, heaviest_subseq_weight, ratio = randomize(num_points, expected_weight_dict)
 
-        x_lst, y_lst = [i[0] for i in x_y_lst], [i[1] for i in x_y_lst]
-        df = pd.DataFrame(data={"x_list": x_lst, "y_list": y_lst, "weights": weight_lst})
-        df.to_csv("csv\\" + graph_name + str(idx) + '.csv')
+        # x_lst, y_lst = [i[0] for i in x_y_lst], [i[1] for i in x_y_lst]
+        # df = pd.DataFrame(data={"x_list": x_lst, "y_list": y_lst, "weights": weight_lst})
+        # df.to_csv("csv\\" + graph_name + str(idx) + '.csv')
 
-        handle_results(None, heaviest_subseq, x_y_lst, graph_name + str(idx), csv_name + str(idx))
-        results.append([idx, heaviest_subseq])
+        handle_results(None, heaviest_subseq_weight, expected_weight_dict[constants.UNIFORM], ratio, x_y_lst,
+                       file_name.format(str(idx)))
+
+        results.append([idx, heaviest_subseq_weight])
+
         constants.print_debug("heaviest sub-sequence is: {}, ratio between the expected and actual weight: {}\n"
-                              .format(heaviest_subseq, ratio))
-    make_graph("Unifrom Distribution", results)
+                              .format(heaviest_subseq_weight, ratio))
+    make_graph(graph_name, results)
 
 
 def run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats):
     constants.print_debug("\n*** running alpha= {} distribution, {} times with {} points each time ***"
                           .format(alpha, repeats, num_points))
-    graph_name = "alpha_{}_distribution_graph_no._".format(alpha)
-    csv_name = "alpha_{}_distribution_csv_no._".format(alpha)
+    graph_name = "alpha_{}_distribution_graph".format(alpha)
+    file_name = "alpha_{}_distribution_no._".format(alpha)
+    results = []
 
     for idx in range(repeats):
         constants.print_debug("\nrun no. {}".format((idx + 1)))
-        x_y_lst, heaviest_subseq, ratio = randomize(num_points, expected_weight_dict, alpha)
-        handle_results(alpha, heaviest_subseq, x_y_lst, graph_name + str(idx), csv_name + str(idx))
-        constants.print_debug("heaviest sub-sequence is: {}, ratio between the expected and actual weight: {}\n"
-                              .format(heaviest_subseq, ratio))
+        x_y_lst, weights_lst, heaviest_subseq_weight, ratio = randomize(num_points, expected_weight_dict, alpha)
 
-    # TODO: Haim - make sure I did this correct, didnt have time to check
-    pass
+        # def handle_results(alpha, heaviest_subseq_weight, expected_weight, ratio, x_y_lst, file_name):
+        handle_results(alpha, heaviest_subseq_weight, expected_weight_dict[constants.ALPHA_.format(str(alpha))], ratio,
+                       x_y_lst, file_name + str(idx))
+
+        results.append([idx, heaviest_subseq_weight])
+
+        constants.print_debug("heaviest sub-sequence is: {}, ratio between the expected and actual weight: {}\n"
+                              .format(heaviest_subseq_weight, ratio))
+
+    make_graph(graph_name, results)
 
 
 if __name__ == "__main__":
 
-    # TODO: Haim
-    # TODO: weird results, talk to Yaniv
     # TODO: try to reach 1000 runs
+
+    #TODO: Yuval G
+
     expected_weight_dict = {}
     num_points = 1000
     repeats = 100

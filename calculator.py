@@ -3,8 +3,6 @@ import math
 import constants
 
 
-# TODO: Haim should call this function and pass the value to the randomize function
-# TODO: Yuval Geva should call this function to give rand weights
 def calc_alpha_probabilities(alpha):
     """
     Calculate the normalized probabilities for each weight in the alpha distribution
@@ -29,7 +27,6 @@ def calc_alpha_probabilities(alpha):
     return prob_dict
 
 
-# TODO: Haim should call this function and pass the value to the randomize function
 def calculate_expected_weight(alpha, alpha_prob_dict=None):
     """
     Calculates the expected weights and store into a dictionary with the keys: UNIFORM/ALPHA_<>
