@@ -29,19 +29,23 @@ def heaviest_subseq(in_list):
     This is wrong! [2,4,6]=12 is an heavier subseq than [5,6]=11, so the list shoud have (6,12), not (6,11)!!
     So we delete 5 to avoid those cases.
     """
-    best_subseq = [(0, 0)] ##tuples of (last number in seq, seq max)
+    best_subseq = [(0, 0, 0)] ##tuples of (last number in seq, seq max)
     for new_elem in in_list:
-        insert_loc = bisect.bisect_left(best_subseq, (new_elem, 0)) #find where to insert current value in best_subseq
-        best_pred_subseq_val = best_subseq[insert_loc - 1][1] #find sum of previous seq
-        new_subseq_val = new_elem + best_pred_subseq_val #calculate weight of current seq
+        insert_loc = bisect.bisect_left(best_subseq, (new_elem[0], 0)) #find where to insert current value in best_subseq
+        best_pred_subseq_val = best_subseq[insert_loc - 1][1] #find y-sum of previous seq
+        new_subseq_val = new_elem[0] + best_pred_subseq_val #calculate y-sum of current seq
+        best_pred_subseq_weight = best_subseq[insert_loc - 1][2] #find weight of previous seq
+        new_subseq_weight = new_elem[1] + best_pred_subseq_weight #calculate weight of current seq
         list_len = len(best_subseq)
         num_deleted = 0
         while (num_deleted + insert_loc < list_len
                and best_subseq[insert_loc][1] <= new_subseq_val):
             del best_subseq[insert_loc] ##if sequence is no longer relevant, delete it
             num_deleted += 1
-        best_subseq.insert(insert_loc, (new_elem, new_subseq_val))
-    return max(val for key, val in best_subseq)
+        best_subseq.insert(insert_loc, (new_elem[0], new_subseq_val, new_subseq_weight))
+    #return max(val for key, val in best_subseq)
+    sorted_by_val = sorted(best_subseq, key=lambda tup: tup[1], reverse=True)
+    return sorted_by_val[0][2]
 
 
 def algorithm(y_lst, weight_lst):
@@ -62,6 +66,6 @@ def algorithm(y_lst, weight_lst):
     if len(weight_lst) != len(y_lst):
         return "list lenghts do not match"
     pairs = [(y_lst[i], weight_lst[i]) for i in range(0, len(weight_lst))]
-    pairs = sorted(pairs, key=lambda tup: tup[0])
-    weights = [x[1] for x in pairs]
-    return heaviest_subseq(y_lst)
+ #   pairs = sorted(pairs, key=lambda tup: tup[0])
+ #   weights = [x[1] for x in pairs]
+    return heaviest_subseq(pairs)

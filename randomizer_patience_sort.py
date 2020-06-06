@@ -21,7 +21,7 @@ def uniform(n):
 
 if __name__ == "__main__":
     num_tests = 500
-    num_points = 10000
+    num_points = 1000
     
     uniform_test = [uniform(num_points) for _ in range(num_tests)]
 
