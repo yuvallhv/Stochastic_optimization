@@ -4,7 +4,7 @@ import numpy
 
 UNIFORM = "uniform"
 ALPHA_ = "alpha_{}"
-ALPHA_RANGE = numpy.arange(-2.0, 3.1, 0.1)
+ALPHA_RANGE = numpy.linspace(-2.0, 3.0, num=51)
 WEIGHT_1 = 1
 WEIGHT_2 = 2
 WEIGHT_4 = 4

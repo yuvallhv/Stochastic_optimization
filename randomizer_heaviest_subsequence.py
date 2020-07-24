@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy
 import constants, calculator, rand_weights_and_points, heaviest_subsequence_alg
 import pandas as pd
+import os, os.path
 
 
 def randomize(num_points, expected_weights_dict, alpha=None):
@@ -21,7 +22,7 @@ def randomize(num_points, expected_weights_dict, alpha=None):
 
     x_y_lst, y_lst = rand_weights_and_points.rand_points_uniform_distribution(num_points)
 
-    if alpha:
+    if alpha!=None:
         weights_lst, expected_weight = rand_weights_and_points.rand_weights_by_alpha(num_points, alpha)
         # TODO: check the expected weights are ok - Yaniv
         expected_weights_dict[constants.ALPHA_.format(str(alpha))] = expected_weight
@@ -31,14 +32,14 @@ def randomize(num_points, expected_weights_dict, alpha=None):
 
     heaviest_subseq_weight = heaviest_subsequence_alg.algorithm(y_lst, weights_lst)
 
-    if alpha:
+    if alpha!=None:
         exp_weight = expected_weights_dict[constants.ALPHA_.format(str(alpha))]
     else:
         exp_weight = expected_weights_dict[constants.UNIFORM]
 
     ratio = abs(heaviest_subseq_weight - exp_weight)
 
-    return x_y_lst, weights_lst, heaviest_subseq_weight, ratio
+    return x_y_lst, weights_lst,int( heaviest_subseq_weight), ratio
 
 
 def handle_results(alpha, heaviest_subseq_weight, expected_weight, ratio, x_y_lst, file_name):
@@ -53,7 +54,7 @@ def handle_results(alpha, heaviest_subseq_weight, expected_weight, ratio, x_y_ls
     :param file_name: The name of the file (to save)
     """
 
-    if alpha:
+    if alpha != None:
         directory_name = constants.ALPHA_.format(str(alpha))
     else:
         directory_name = constants.UNIFORM
@@ -73,7 +74,9 @@ def handle_results(alpha, heaviest_subseq_weight, expected_weight, ratio, x_y_ls
 
     # dump dictionary to json file
     file_name = f"{directory_name}/{file_name}.json"
-    with open(file_name, 'w', encoding='utf-8') as f:
+    if not os.path.exists(directory_name):
+        os.mkdir(directory_name)
+    with open(file_name, "w+", encoding='utf-8') as f:
         json.dump(json_dict, f, ensure_ascii=False, indent=4)
 
 
@@ -89,9 +92,17 @@ def make_graph(name, results, alpha=None):
     plt.title(name + " - Heaviest Subsequences Test", fontweight="bold")
     plt.figtext(.15, .8, "mean = {}".format(mean))
     plt.figtext(.15, .75, "variance = {}".format(variance))
-    plt.show()
+    # file_name = name+".png"
+    if alpha != None:
+        directory_name = constants.ALPHA_.format(str(alpha))
+    else:
+        directory_name = constants.UNIFORM
+    fig_name = f"{directory_name}/{name}.png"
+    plt.savefig(fig_name)
+    plt.clf()
+    # plt.show()
 
-    # TODO: Yaniv
+
 
 
 def run_uniform_distribution(expected_weight_dict, num_points, repeats):
@@ -139,14 +150,12 @@ def run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats):
         constants.print_debug("heaviest sub-sequence is: {}, ratio between the expected and actual weight: {}\n"
                               .format(heaviest_subseq_weight, ratio))
 
-    make_graph(graph_name, results)
+    make_graph(graph_name, results,alpha)
 
 
 if __name__ == "__main__":
 
     # TODO: try to reach 1000 runs
-
-    #TODO: Yuval G
 
     expected_weight_dict = {}
     num_points = 1000
@@ -155,18 +164,18 @@ if __name__ == "__main__":
     # calculate the expected weight of the heaviest sub-sequence and ration for uniform distribution
     expected_weight_dict[constants.UNIFORM] = calculator.calculate_expected_weight(None)
     run_uniform_distribution(expected_weight_dict, num_points, repeats)
-    #
-    # # calculate the expected weight of the heaviest sub-sequence and ration for alpha distribution
-    # for alpha in constants.ALPHA_RANGE:
-    #
-    #     # calculate the probabilities to get each weight (1,2,4,8,16) by the chosen alpha
-    #     alpha_prob_list = calculator.calc_alpha_probabilities(alpha)
-    #
-    #     # calculate the expected weight of the heaviest sub-sequence for the chosen alpha
-    #     expected_weight_dict[constants.ALPHA + str(alpha)] = calculator.calculate_expected_weight(alpha, alpha_prob_list)
-    #
-    #     # run
-    #     run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats)
+
+     # calculate the expected weight of the heaviest sub-sequence and ration for alpha distribution
+    for alpha in constants.ALPHA_RANGE:
+
+        # calculate the probabilities to get each weight (1,2,4,8,16) by the chosen alpha
+        alpha_prob_list = calculator.calc_alpha_probabilities(alpha)
+
+        # calculate the expected weight of the heaviest sub-sequence for the chosen alpha
+        expected_weight_dict[constants.ALPHA_ + str(alpha)] = calculator.calculate_expected_weight(alpha, alpha_prob_list)
+
+        # run
+        run_chosen_alpha(alpha, expected_weight_dict, num_points, repeats)
 
 
     # for each point: x=place in line, y=row in the plane
@@ -177,9 +186,9 @@ if __name__ == "__main__":
     # display the results in a graph and export to excel (alpha, the weight of the heaviest subsequence, ratio,
     #   the points, the weight of each point)
     # use 10 million points
-
+    #
     # try to reach 1000 runs for several chosen alpha - func: run_chosen_alpha
-
+    #
     # write the results for each test in a separate execl (and a separate function :)
 
 
