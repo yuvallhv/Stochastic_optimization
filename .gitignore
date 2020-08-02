@@ -4,3 +4,6 @@ target
 target/
 *.iml
 __pycache__/
+patience_sorting.o
+patience_sorting
+patience_sort_alg.cpython-37m-darwin.so
